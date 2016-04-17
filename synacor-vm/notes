@@ -1,0 +1,7 @@
+email: syl*****+synacor@gmail.com
+
+machine state schema:
+        memory: hash
+        registers: vector
+        stack: list
+        
