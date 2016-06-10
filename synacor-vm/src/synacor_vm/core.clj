@@ -1,7 +1,6 @@
 (ns synacor-vm.core
   (:gen-class)
-  (:import jline.Terminal
-           java.nio.file.Files
+  (:import java.nio.file.Files
            java.nio.file.Paths))
 
 (defn register?
@@ -207,12 +206,27 @@
       (print c))
     (assoc state :pc (+ 2 (:pc state)))))
 
-(let [term (Terminal/getTerminal)]
-  (defn op-in
-    [state]
-    (store state
-           (get-val state (+ 1 (:pc state)))
-           (.readCharacter term System/in))))
+(defn op-in
+  [state]
+  (let [input (if (empty? (:input state))
+                (concat (seq (read-line))
+                        (list (char 10)))
+                (:input state))
+        c (int (first input))
+        new-input (rest input)
+        pc (:pc state)
+        dest ((:memory state) (+ 1 pc))
+        state (store state dest c)]
+    ;(println "input" input)
+    ;(println "new-input" new-input)
+    ;(println "dest" dest)
+    ;(println "c" c)
+    ;(println "pc" pc)
+    ;(println "registers" (:reg state))
+    
+    (assoc state
+           :input new-input
+           :pc (+ pc 2))))
 
 (defn noop
   [state]
@@ -249,7 +263,8 @@
    :reg [0 0 0 0 0 0 0 0]
    :stack '()
    :running true
-   :pc 0})
+   :pc 0
+   :input '()})
 
 (defn get-word
   [program idx]
